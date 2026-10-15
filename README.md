@@ -205,7 +205,7 @@ source, and it never touches the plug-in's code or copy protection.
 | The plug-in is still missing | Quit the music app completely (⌘Q) and reopen it. In Live, Option-click **Rescan** (Settings → Plug-Ins). |
 | Step 4 says *"destination path 'legacy-au-shim' already exists"* | You've downloaded it before. Run `cd ~/legacy-au-shim && git pull && ./build.sh Geist2 install` instead. |
 | *"xcrun: error: invalid active developer path"* or *"git: command not found"* | Apple's developer tools aren't installed yet. Repeat [Step 2](#step-2-install-apples-free-developer-tools). |
-| *"no config"* | The install name is misspelled. It's case-sensitive: `Geist2`, `Spitter2`. |
+| *"no config"* | The install name is misspelled. Use `Geist2` or `Spitter2`. |
 | *Not Authorised* / license message | The plug-in's own license isn't active on this Mac. Authorize it the normal way (e.g. FXpansion's license manager). The shim doesn't touch licensing. |
 | Live says *"Lost the connection to the Audio Unit plug-in"* | The plug-in crashed. Please [open an issue](https://github.com/gsdan8/legacy-au-shim/issues) and attach the newest `AUHostingService…` file from `~/Library/Logs/DiagnosticReports`. |
 
