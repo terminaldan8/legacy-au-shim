@@ -15,36 +15,144 @@
 
 ---
 
-## The problem
+## In plain English
 
-After upgrading to **macOS 27**, some of your plug-ins silently disappeared:
+You updated your Mac to **macOS 27**, and now a plug-in you love, like **Geist2**, has
+vanished from Ableton Live, Logic or your other music apps. Your old songs open with the
+plug-in **missing**.
 
-- **Ableton Live** shows the plug-in as missing, and its log says `Audio Unit v2: Restore 1 failed: <Plugin>`
-- **Logic / GarageBand** no longer list it
-- `auval -v aumu FxG2 FXPN` says **"didn't find the component"**
+**The plug-in isn't broken.** It's still on your Mac. macOS 27 just stopped *recognizing*
+plug-ins that introduce themselves the old-fashioned way, and some plug-ins were never
+updated because their makers moved on.
 
-The plug-in is still installed, and it worked fine before the upgrade. macOS 27 simply
-**stopped recognizing Audio Units that register the old (pre-2011) way**: through a
-Carbon `.rsrc` resource file instead of an `AudioComponents` entry in `Info.plist`.
-Many classic plug-ins were never updated, so they're now invisible.
+**This project fixes that.** It adds a tiny helper, a "shim", for each affected plug-in. Think
+of it as a **travel adapter**: your music app plugs into the adapter, and the adapter plugs
+into your original plug-in. Nothing about the plug-in itself changes.
 
-## The fix
+After installing it:
 
-For each affected plug-in, this project builds a tiny **shim**: a separate AU that
-registers the modern way under the **exact same ID and name** as the original.
-When your DAW opens it, the shim loads the **genuine plug-in** from where it's
-installed and passes every call through to it.
+- ✅ The plug-in shows up again in your music apps
+- ✅ Your **old songs open with all their plug-in settings**
+- ✅ It sounds and works exactly as before, because it *is* the original plug-in
+- ✅ You can remove it any time with one command
 
-```mermaid
-flowchart LR
-    DAW["Your DAW<br/>(Live, Logic…)"] -- "AU v2 calls" --> SHIM["Geist2Shim.component<br/>registered as aumu FxG2 FXPN"]
-    SHIM -- "loads untouched binary<br/>+ forwards calls" --> ORIG["Geist2.component<br/>(original, unmodified)"]
+> **Is this a crack?** No. You must already own the plug-in, and its own license check
+> still runs normally. See [Is it safe?](#is-it-safe)
+
+---
+
+## Do I need this?
+
+**Yes, if all of these are true:**
+
+1. Your Mac runs **macOS 27** or newer
+2. A plug-in that worked before the upgrade is now **missing** from your music apps
+3. It's one of the plug-ins in the [compatibility list](#compatibility) (currently FXpansion
+   **Geist2** or **Spitter2**), or another plug-in that was never updated
+
+**Not sure?** Ableton Live users can check: when you open an old song, Live shows the
+plug-in as missing, and its log file (`Log.txt`) contains *"Restore 1 failed: Geist2"*.
+
+---
+
+## Install it: step by step
+
+No experience needed. It takes about 5 minutes, most of it waiting for downloads. You'll
+copy and paste three commands into an app called **Terminal**.
+
+### Step 1: Open Terminal
+
+1. Press **⌘ Command + Space** to open Spotlight search.
+2. Type **Terminal** and press **Return**.
+
+A window with a blinking cursor appears. That's where you'll paste the commands. To paste:
+click inside the window, press **⌘ Command + V**, then press **Return**.
+
+### Step 2: Install Apple's free developer tools
+
+Paste this and press Return:
+
+```sh
+xcode-select --install
 ```
 
-- ✅ **Your old projects open with their plug-in settings restored.** The ID matches, so the DAW can't tell the difference.
-- ✅ **Nothing is patched.** The original plug-in, its code signature and its copy protection or licensing are untouched.
-- ✅ **No third-party code is included.** You need your own installed (and licensed) copy.
-- ✅ **Easy to undo.** It's one extra `.component` file in your user plug-in folder.
+- A pop-up appears asking to install the **command line developer tools**. Click
+  **Install**, then **Agree**, and wait until it says the software was installed (a few minutes).
+- If Terminal instead says *"command line tools are already installed"*, great. You
+  already have them; go to the next step.
+
+### Step 3: Make sure Rosetta is installed
+
+Rosetta is Apple's free translator that lets older Intel plug-ins run on newer Macs. If the
+plug-in worked before, you most likely have it already. Paste this to be sure:
+
+```sh
+softwareupdate --install-rosetta --agree-to-license
+```
+
+It either installs Rosetta or says it's already installed. Both are fine. (It may ask for
+your Mac password. That's Apple's installer, not this project. When you type it, nothing
+appears on screen; that's normal.)
+
+### Step 4: Download and install the shim
+
+Paste this whole line and press Return. Use the version for your plug-in.
+
+**For Geist2:**
+
+```sh
+cd ~ && git clone https://github.com/gsdan8/legacy-au-shim.git && cd legacy-au-shim && ./build.sh Geist2 install
+```
+
+**For Spitter2:** same line, ending in `./build.sh Spitter2 install`.
+
+When it's done, the last line reads:
+
+```text
+installed to /Users/yourname/Library/Audio/Plug-Ins/Components/Geist2Shim.component
+```
+
+That's it. The shim is installed. (This also saved the project in a folder called
+`legacy-au-shim` in your home folder. You can leave it there.)
+
+### Step 5: Restart your music app
+
+1. **Quit** your music app completely (**⌘ Command + Q**) and open it again.
+2. **Ableton Live users:** if the plug-in still doesn't appear, open **Live → Settings →
+   Plug-Ins**, hold the **Option** key and click **Rescan**.
+3. Open an old song that used the plug-in. Its settings should be back.
+
+> 💡 **Tip:** before opening an important song the first time, make a copy of it, just in case.
+
+### Removing it
+
+Open Terminal and paste:
+
+```sh
+cd ~/legacy-au-shim && ./build.sh Geist2 uninstall
+```
+
+(Use `Spitter2` instead of `Geist2` if that's the one you installed.)
+
+---
+
+## Compatibility
+
+Tested on macOS 27.0 (26A428) · Apple M1 Max · Ableton Live 12.4.6
+
+| Plug-in | Install name | Checked with Apple's validator | Tested in a music app |
+|---|---|:---:|---|
+| **FXpansion Geist2** 2.1.2 | `Geist2` | ✅ | ✅ Ableton Live: songs restore, editor opens |
+| **FXpansion Spitter2** 2.1.2 | `Spitter2` | ✅ | not yet tested |
+
+Both are FXpansion plug-ins that were never updated after 2019. Plug-ins that are still
+maintained usually aren't affected; if you have an old copy of one, **updating it** from its
+maker is the better fix.
+
+**Help grow this list.** The plug-ins this fixes are mostly abandoned ones that are hard to
+find. If you get another one working (or not), please
+[open an issue](https://github.com/gsdan8/legacy-au-shim/issues) and say which plug-in and
+version.
 
 ---
 
@@ -57,19 +165,20 @@ download and trust blindly, and the whole thing is small enough to read.
 lines, commented), plus a 45-line [`build.sh`](build.sh). That's everything.
 
 **What it does:**
-- Loads the plug-in you already have installed (read-only), and passes your DAW's calls to it.
+- Loads the plug-in you already have installed (read-only), and passes your music app's
+  calls to it.
 - Installs one file, `~/Library/Audio/Plug-Ins/Components/<Name>Shim.component`, in your
   **user** folder.
 - `build.sh` restarts macOS's `AudioComponentRegistrar` so the new plug-in is picked up
   immediately. macOS relaunches it automatically.
 
 **What it doesn't do:**
-- ❌ No network access: no downloads, no telemetry, no "phoning home"
+- ❌ No internet access: no downloads, no tracking, no "phoning home"
 - ❌ No password or `sudo`, and no system folders touched
-- ❌ Never modifies the original plug-in, its signature or its licensing
-- ❌ Doesn't run other programs or write files at runtime
+- ❌ Never modifies the original plug-in, its signature or its license
+- ❌ Doesn't run other programs or write files while it's running
 
-**Check it yourself:**
+**Check it yourself** (from the `legacy-au-shim` folder):
 
 ```sh
 grep -nEi "NSURL(Session|Connection)|socket|curl|http" src/AUShim.mm   # no output = no networking code
@@ -77,39 +186,98 @@ grep -n sudo build.sh                                                    # no ou
 ./build.sh Geist2 && nm -u build/Geist2Shim.component/Contents/MacOS/Geist2Shim   # every system function it uses
 ```
 
-Every push is also built automatically on GitHub's macOS machines, which **fail the build
-if the compiled shim ever imports networking or process-launching functions**. See the
-*build* badge above and the [workflow](.github/workflows/build.yml).
+Every change is also built automatically on GitHub's macOS machines, which **fail the build
+if the shim ever uses networking or program-launching functions**. See the *build* badge at
+the top and the [workflow](.github/workflows/build.yml).
 
 **The one unusual trick, in plain words:** the old plug-in remembers an internal "who am I"
-handle, which modern macOS no longer accepts for some notifications. The shim swaps that
-single value for the one your DAW uses, but only after checking it holds exactly the
-expected value; otherwise it leaves it alone and logs a warning. It's a few lines, marked
-in the source, and it never touches the plug-in's code or copy protection.
+value, which modern macOS no longer accepts for some messages. The shim swaps that single
+value for the one your music app uses, but only after checking it holds exactly what's
+expected; otherwise it leaves it alone and logs a warning. It's a few lines, marked in the
+source, and it never touches the plug-in's code or copy protection.
 
 ---
 
-## Quick start (about 2 minutes)
+## Troubleshooting
 
-**You need:** macOS 27, the Xcode command line tools, and Rosetta.
+| What you see | What to do |
+|---|---|
+| The plug-in is still missing | Quit the music app completely (⌘Q) and reopen it. In Live, Option-click **Rescan** (Settings → Plug-Ins). |
+| Step 4 says *"destination path 'legacy-au-shim' already exists"* | You've downloaded it before. Run `cd ~/legacy-au-shim && git pull && ./build.sh Geist2 install` instead. |
+| *"xcrun: error: invalid active developer path"* or *"git: command not found"* | Apple's developer tools aren't installed yet. Repeat [Step 2](#step-2-install-apples-free-developer-tools). |
+| *"no config"* | The install name is misspelled. It's case-sensitive: `Geist2`, `Spitter2`. |
+| *Not Authorised* / license message | The plug-in's own license isn't active on this Mac. Authorize it the normal way (e.g. FXpansion's license manager). The shim doesn't touch licensing. |
+| Live says *"Lost the connection to the Audio Unit plug-in"* | The plug-in crashed. Please [open an issue](https://github.com/gsdan8/legacy-au-shim/issues) and attach the newest `AUHostingService…` file from `~/Library/Logs/DiagnosticReports`. |
 
-All commands below go in **Terminal** (Applications → Utilities → Terminal). Paste a
-command, press Return, and wait for it to finish before the next one.
+---
 
-```sh
-xcode-select --install                     # skip if already installed
-softwareupdate --install-rosetta           # skip if already installed
-```
+## FAQ
 
-**1. Get the project**
+**Is this a crack?**
+No. The shim only fixes how macOS *finds* the plug-in. It loads your installed copy
+unmodified, and that copy's own license and copy protection run exactly as before. A
+plug-in that isn't authorized on your Mac still refuses to run.
 
-```sh
-git clone https://github.com/gsdan8/legacy-au-shim.git
-cd legacy-au-shim
-```
+**Does it change how the plug-in sounds?**
+No. All audio, presets, the editor and saving come from the original plug-in. The shim
+just passes messages through.
 
-**2. See which of your plug-ins are affected.** This lists installed AUs that only
-register the old way:
+**Will my songs still work if I remove the shim later?**
+Yes. The plug-in saves its settings in its own format; the shim doesn't change them.
+
+**Why does it need Rosetta?**
+These plug-ins were made for older Intel Macs. Rosetta lets them run on newer Apple
+Silicon Macs (M1, M2, …), just like before macOS 27.
+
+**What happens when Apple removes Rosetta?**
+Then Intel-only plug-ins stop working, with or without this shim. This buys time; it can't
+turn an old plug-in into a new one.
+
+**Can I just edit the plug-in's files instead?**
+Please don't. It breaks the plug-in's digital signature, and copy-protected plug-ins (like
+Geist2) then refuse to load.
+
+---
+
+## For developers and the curious
+
+### Why it broke
+
+Old AUs announce themselves through a `thng` resource in a Carbon `.rsrc` file and a
+Component Manager entry point (for example `SymbiosisEntry`). They have no
+`AudioComponents` entry in their `Info.plist`. macOS 27 no longer registers these:
+`auval -v aumu FxG2 FXPN` reports *didn't find the component*, even under Rosetta.
+
+### How it works
+
+1. **Registration.** The shim's `Info.plist` has an `AudioComponents` entry copied from
+   the legacy `thng` resource (type / subtype / manufacturer / name / version), with
+   `factoryFunction = AUShimFactory`.
+2. **Loading.** On open, `dlopen`s `LegacyAUBinary` and looks up `LegacyAUEntry`.
+3. **Component Manager bridge.** Registers that entry locally with `RegisterComponent`,
+   then `OpenAComponent`s a private instance. This still works on macOS 27, even though
+   the system no longer *discovers* such components.
+4. **Forwarding.** Every AU selector (Initialize, Get/SetProperty, Get/SetParameter,
+   ScheduleParameters, Render, Reset, MIDIEvent, listeners and render notifies) is
+   marshalled into an LP64 `ComponentParameters` block (`params[0]` = instance, then
+   arguments in order) and passed to the entry with the instance storage.
+5. **Instance fix-up.** The plug-in reports parameter and property changes using its
+   stored instance handle, which AudioToolbox rejects for private Component Manager
+   instances. The shim points that field (offset 8 in Symbiosis and AUBase objects;
+   the value is verified first) at the host's instance. Symbiosis needs the original
+   handle back while saving or restoring state (`LegacyAUStateUsesLegacyInstance`).
+6. **Editor.** `kAudioUnitProperty_CocoaUI` returns the shim's own view factory, which
+   asks the plug-in for its real factory and hands it the private instance.
+
+Shims are built `x86_64`. Native Apple Silicon hosts run them out-of-process under
+Rosetta, just as they ran these plug-ins before macOS 27.
+
+| Plug-in | Audio Unit ID (for `auval -v`) |
+|---|---|
+| Geist2 | `aumu FxG2 FXPN` |
+| Spitter2 | `aufx FXS2 FXPN` |
+
+### Find affected plug-ins
 
 ```sh
 for d in /Library/Audio/Plug-Ins/Components/*.component; do
@@ -119,64 +287,6 @@ for d in /Library/Audio/Plug-Ins/Components/*.component; do
   fi
 done
 ```
-
-Example output (each line is a plug-in that needs a shim; no output means you're not affected):
-
-```text
-Geist2.component
-Spitter2.component
-```
-
-**3. Install a shim.** If the plug-in has a ready-made config in [`configs/`](configs), run:
-
-```sh
-./build.sh Geist2 install
-```
-
-For any other plug-in, create a config first (see
-[Adding another plug-in](#adding-another-plug-in)), then run `./build.sh SomePlugin install`.
-
-**4. Check it.** Use the plug-in's ID from the **ID** column of the
-[compatibility table](#compatibility) (or from its config):
-
-```sh
-auval -v aumu FxG2 FXPN
-#   ...
-#   AU VALIDATION SUCCEEDED.
-```
-
-**5. Restart your DAW.** In Ableton Live, if the plug-in still doesn't show up, go to
-**Settings → Plug-Ins** and **Option-click "Rescan"**.
-
-> 💡 **Back up your projects before opening them the first time**, just in case.
-
-### Uninstall
-
-```sh
-./build.sh Geist2 uninstall
-```
-
----
-
-## Compatibility
-
-Tested on macOS 27.0 (26A428) · Apple M1 Max · Ableton Live 12.4.6 (native, Apple Silicon)
-
-| Plug-in | Config | ID (for `auval -v`) | `auval` (Intel + native) | In a DAW |
-|---|---|---|:---:|---|
-| **FXpansion Geist2** 2.1.2 | `Geist2` | `aumu FxG2 FXPN` | ✅ | ✅ Live: sets restore, editor works |
-| **FXpansion Spitter2** 2.1.2 | `Spitter2` | `aufx FXS2 FXPN` | ✅ | not yet tested |
-
-Both are FXpansion plug-ins built with the **Symbiosis** wrapper and were never updated
-after 2019. Maintained plug-ins usually aren't affected: their current versions register the
-modern way, so only an old installed copy would need a shim (updating it is the better fix).
-
-**Help grow this list.** The plug-ins this fixes are mostly abandoned ones that are hard to
-find. If you got another one working (or not), please open an issue or a pull request with
-its config, so it can be added to `configs/` for everyone.
-
-Plug-ins built with the **Symbiosis** wrapper or **Apple's AUBase SDK** are the most
-likely to work. In general, anything the step 2 command lists is worth a try.
 
 ### Adding another plug-in
 
@@ -200,74 +310,10 @@ likely to work. In general, anything the step 2 command lists is worth a try.
    - `LegacyAUEntry` → the `…Entry` name from step 2 (also listed by `nm -gU <binary>`)
    - `CFBundleExecutable`, `CFBundleName`, `CFBundleIdentifier` → something unique, e.g. `SomePluginShim`
 4. Build and check: `./build.sh SomePlugin install`, then `auval -v aufx Smpl Manu`.
+   If `auval` reports *Class Data fields … do not match*, add
+   `<key>LegacyAUStateUsesLegacyInstance</key><true/>` (or `<false/>`) and rebuild.
 
----
-
-## Troubleshooting
-
-| Symptom | What to do |
-|---|---|
-| Plug-in still missing in the DAW | Quit the DAW completely and reopen it. In Live, Option-click **Rescan**. Check that `auval -v …` succeeds. |
-| `auval`: *didn't find the component* | The shim isn't installed or the ID is wrong. Run `ls ~/Library/Audio/Plug-Ins/Components` and compare the IDs in `configs/<Name>.plist` with the plug-in's `.rsrc` (see [Adding another plug-in](#adding-another-plug-in)). |
-| `auval`: *Class Data fields … do not match* | Saving state needs the other instance mode. Add `<key>LegacyAUStateUsesLegacyInstance</key><true/>` (or `<false/>`) to the config, then rebuild. |
-| *Not Authorised* / license error | The plug-in's own licensing (iLok, etc.) isn't active on this Mac. Authorize it the normal way; the shim doesn't touch licensing. |
-| "Lost the connection to the Audio Unit" | The plug-in crashed in its host process. Open `~/Library/Logs/DiagnosticReports/AUHostingService*.ips` and open an issue with it. |
-| Editor won't open | Open an issue with the host's crash report (if any) and the plug-in name. |
-
-Logs from the shim itself appear in Console.app; search for **`AUShim`**.
-
----
-
-## FAQ
-
-**Is this a crack?**
-No. The shim only fixes how macOS *finds* the plug-in. It loads your installed copy
-unmodified, and that copy's own licensing and copy protection run exactly as before. A
-plug-in that isn't authorized on your Mac still refuses to run.
-
-**Does it change how the plug-in sounds or behaves?**
-No. All audio, presets, the editor and state saving come from the original plug-in's
-code. The shim just passes calls through, which adds negligible overhead.
-
-**Will my projects still work if I remove the shim later?**
-Yes. The saved state is written by the plug-in itself in its own format.
-
-**Why does it need Rosetta?**
-These plug-ins are Intel-only, so the shim is too. Native Apple Silicon DAWs
-automatically run Intel AUs in a separate Rosetta process, as they did before macOS 27.
-
-**What happens when Apple removes Rosetta?**
-Intel-only plug-ins stop working, with or without this shim. This buys time; it
-doesn't make the plug-ins native.
-
-**Can I just edit the plug-in's `Info.plist` instead?**
-Don't. It breaks the code signature, and copy-protected plug-ins (Geist2, for
-example) abort at load.
-
----
-
-## How it works (technical)
-
-1. **Registration.** The shim's `Info.plist` has an `AudioComponents` entry copied from
-   the legacy `thng` resource (type / subtype / manufacturer / name / version), with
-   `factoryFunction = AUShimFactory`.
-2. **Loading.** On open, `dlopen`s `LegacyAUBinary` and looks up `LegacyAUEntry`
-   (e.g. `SymbiosisEntry`).
-3. **Component Manager bridge.** Registers that entry locally with `RegisterComponent`,
-   then `OpenAComponent`s a private instance. This still works on macOS 27, even though
-   the system no longer *discovers* such components.
-4. **Forwarding.** Every AU selector (Initialize, Get/SetProperty, Get/SetParameter,
-   ScheduleParameters, Render, Reset, MIDIEvent, listeners and render notifies) is
-   marshalled into an LP64 `ComponentParameters` block (`params[0]` = instance, then
-   arguments in order) and passed to the entry with the instance storage.
-5. **Instance fix-up.** The plug-in reports parameter and property changes using its
-   stored instance handle, which AudioToolbox rejects for private Component Manager
-   instances. The shim points that field (offset 8 in Symbiosis and AUBase objects;
-   the value is verified first) at the host's instance. Symbiosis needs the original
-   handle back while saving or restoring state, which the shim handles
-   (`LegacyAUStateUsesLegacyInstance`).
-6. **Editor.** `kAudioUnitProperty_CocoaUI` returns the shim's own view factory, which
-   asks the plug-in for its real factory and hands it the private instance.
+Logs from the shim appear in Console.app; search for **`AUShim`**.
 
 ### Config reference
 
@@ -300,9 +346,9 @@ example) abort at load.
 
 ## Contributing
 
-Plug-in reports are the most valuable contribution: they grow the compatibility table
-and `configs/`. Bug fixes and support for other wrappers are welcome too. Please test
-with `auval` in both modes (`auval …` and `arch -x86_64 auval …`) before opening a PR.
+Plug-in reports are the most valuable contribution: they grow the compatibility list and
+`configs/`. Bug fixes and support for other wrappers are welcome too. Please test with
+`auval` in both modes (`auval …` and `arch -x86_64 auval …`) before opening a PR.
 
 ## Disclaimer
 
