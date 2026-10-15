@@ -82,7 +82,6 @@ Example output (each line is a plug-in that needs a shim; no output means you're
 
 ```text
 Geist2.component
-Mackity.component
 Spitter2.component
 ```
 
@@ -125,13 +124,10 @@ Tested on macOS 27.0 (26A428) · Apple M1 Max · Ableton Live 12.4.6 (native, Ap
 |---|---|---|:---:|---|
 | **FXpansion Geist2** 2.1.2 | `Geist2` | `aumu FxG2 FXPN` | ✅ | ✅ Live: sets restore, editor works |
 | **FXpansion Spitter2** 2.1.2 | `Spitter2` | `aufx FXS2 FXPN` | ✅ | not yet tested |
-| **Dada Life Endless Smile** 1.0 | `EndlessSmile` | `aufx ENDS TLDN` | ✅ | not yet tested |
-| **Airwindows Mackity** 1.0 | `Mackity` | `aufx mkty Dthr` | ✅ | not yet tested |
-| **ISM BazzISM2** 2.5.3 | `BazzISM2` | `aumu Baz2 ISM_` | ✅ | not yet tested |
-| Slate Digital FG-X 1.4 | none yet ([make your own](#adding-another-plug-in)) | `aufx FG-X SlDg` | loads; untested without a license | — |
 
-Geist2, Spitter2 and Endless Smile use the **Symbiosis** wrapper, Mackity uses
-**Apple's AU SDK**, and BazzISM2 uses its own AU wrapper.
+Both are FXpansion plug-ins built with the **Symbiosis** wrapper and were never updated
+after 2019. Maintained plug-ins usually aren't affected: their current versions register the
+modern way, so only an old installed copy would need a shim (updating it is the better fix).
 
 **Help grow this list.** The plug-ins this fixes are mostly abandoned ones that are hard to
 find. If you got another one working (or not), please open an issue or a pull request with
@@ -142,8 +138,7 @@ likely to work. In general, anything the step 2 command lists is worth a try.
 
 ### Adding another plug-in
 
-1. Copy an existing config whose wrapper matches (Symbiosis → `Geist2.plist`,
-   Apple AU SDK → `Mackity.plist`):
+1. Copy an existing config:
    ```sh
    cp configs/Geist2.plist configs/SomePlugin.plist
    ```
