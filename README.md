@@ -22,7 +22,7 @@ After upgrading to **macOS 27**, some of your plug-ins silently disappeared:
 - **Logic / GarageBand** no longer list it
 - `auval -v aumu FxG2 FXPN` says **"didn't find the component"**
 
-The plug-in is still installed, and still worked last week. macOS 27 simply
+The plug-in is still installed, and it worked fine before the upgrade. macOS 27 simply
 **stopped recognizing Audio Units that register the old (pre-2011) way**: through a
 Carbon `.rsrc` resource file instead of an `AudioComponents` entry in `Info.plist`.
 Many classic plug-ins were never updated, so they're now invisible.
@@ -51,6 +51,9 @@ flowchart LR
 
 **You need:** macOS 27, the Xcode command line tools, and Rosetta.
 
+All commands below go in **Terminal** (Applications → Utilities → Terminal). Paste a
+command, press Return, and wait for it to finish before the next one.
+
 ```sh
 xcode-select --install                     # skip if already installed
 softwareupdate --install-rosetta           # skip if already installed
@@ -75,6 +78,14 @@ for d in /Library/Audio/Plug-Ins/Components/*.component; do
 done
 ```
 
+Example output (each line is a plug-in that needs a shim; no output means you're not affected):
+
+```text
+Geist2.component
+Mackity.component
+Spitter2.component
+```
+
 **3. Install a shim.** If the plug-in has a ready-made config in [`configs/`](configs), run:
 
 ```sh
@@ -84,7 +95,8 @@ done
 For any other plug-in, create a config first (see
 [Adding another plug-in](#adding-another-plug-in)), then run `./build.sh SomePlugin install`.
 
-**4. Check it.** Use the plug-in's type, subtype and manufacturer from its config:
+**4. Check it.** Use the plug-in's ID from the **ID** column of the
+[compatibility table](#compatibility) (or from its config):
 
 ```sh
 auval -v aumu FxG2 FXPN
@@ -109,14 +121,17 @@ auval -v aumu FxG2 FXPN
 
 Tested on macOS 27.0 (26A428) · Apple M1 Max · Ableton Live 12.4.6 (native, Apple Silicon)
 
-| Plug-in | Wrapper | Config | `auval` (Intel + native) | In a DAW |
+| Plug-in | Config | ID (for `auval -v`) | `auval` (Intel + native) | In a DAW |
 |---|---|---|:---:|---|
-| **FXpansion Geist2** 2.1.2 | Symbiosis | `Geist2` | ✅ | ✅ Live: sets restore, editor works |
-| **FXpansion Spitter2** 2.1.2 | Symbiosis | `Spitter2` | ✅ | not yet tested |
-| **Dada Life Endless Smile** 1.0 | Symbiosis | `EndlessSmile` | ✅ | not yet tested |
-| **Airwindows Mackity** 1.0 | Apple AU SDK | `Mackity` | ✅ | not yet tested |
-| **ISM BazzISM2** 2.5.3 | AU wrapper | `BazzISM2` | ✅ | not yet tested |
-| Slate Digital FG-X 1.4 | Slate | generate | loads; untested without a license | — |
+| **FXpansion Geist2** 2.1.2 | `Geist2` | `aumu FxG2 FXPN` | ✅ | ✅ Live: sets restore, editor works |
+| **FXpansion Spitter2** 2.1.2 | `Spitter2` | `aufx FXS2 FXPN` | ✅ | not yet tested |
+| **Dada Life Endless Smile** 1.0 | `EndlessSmile` | `aufx ENDS TLDN` | ✅ | not yet tested |
+| **Airwindows Mackity** 1.0 | `Mackity` | `aufx mkty Dthr` | ✅ | not yet tested |
+| **ISM BazzISM2** 2.5.3 | `BazzISM2` | `aumu Baz2 ISM_` | ✅ | not yet tested |
+| Slate Digital FG-X 1.4 | none yet ([make your own](#adding-another-plug-in)) | `aufx FG-X SlDg` | loads; untested without a license | — |
+
+Geist2, Spitter2 and Endless Smile use the **Symbiosis** wrapper, Mackity uses
+**Apple's AU SDK**, and BazzISM2 uses its own AU wrapper.
 
 **Got another plug-in working (or not)?** Please open an issue, or a pull request with its
 config, so it can be added to `configs/` for everyone.
@@ -141,7 +156,8 @@ likely to work. In general, anything the step 2 command lists is worth a try.
    ```
 3. Edit `configs/SomePlugin.plist`:
    - `AudioComponents` → `type`, `subtype`, `manufacturer`, `name` (the "Vendor: Plugin"
-     string), and `version` (`0xMMMMmmbb` as a decimal, e.g. 1.0.0 = `65536`)
+     string), and `version`, calculated as major × 65536 + minor × 256 + patch
+     (for example 1.0.0 = `65536` and 2.1.2 = `131330`)
    - `LegacyAUBinary` → `/Library/Audio/Plug-Ins/Components/Some Plugin.component/Contents/MacOS/<executable>`
    - `LegacyAUEntry` → the `…Entry` name from step 2 (also listed by `nm -gU <binary>`)
    - `CFBundleExecutable`, `CFBundleName`, `CFBundleIdentifier` → something unique, e.g. `SomePluginShim`
