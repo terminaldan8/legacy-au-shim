@@ -1,0 +1,33 @@
+name: build
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  build:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build every config
+        run: |
+          for c in configs/*.plist; do
+            ./build.sh "$(basename "$c" .plist)"
+          done
+
+      - name: Check binaries use no network or process APIs
+        run: |
+          status=0
+          for b in build/*.component/Contents/MacOS/*; do
+            echo "== $b"
+            lipo -archs "$b"
+            if nm -u "$b" | grep -Ei 'socket|connect|getaddrinfo|NSURLSession|NSURLConnection|CFSocket|CFStream|curl|_system$|_exec|posix_spawn|popen|NSTask'; then
+              echo "::error file=$b::binary imports network or process APIs"
+              status=1
+            fi
+          done
+          exit $status
+
+      - name: List everything the shim imports (for review)
+        run: nm -u build/Geist2Shim.component/Contents/MacOS/Geist2Shim

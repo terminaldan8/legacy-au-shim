@@ -6,6 +6,7 @@
 </p>
 
 <p align="center">
+  <a href="https://github.com/gsdan8/legacy-au-shim/actions/workflows/build.yml"><img alt="build" src="https://github.com/gsdan8/legacy-au-shim/actions/workflows/build.yml/badge.svg"></a>
   <img alt="macOS 27+" src="https://img.shields.io/badge/macOS-27%2B-black?logo=apple">
   <img alt="Apple Silicon via Rosetta" src="https://img.shields.io/badge/Apple%20Silicon-via%20Rosetta-555">
   <img alt="Audio Unit v2" src="https://img.shields.io/badge/Audio%20Unit-v2-blue">
@@ -44,6 +45,47 @@ flowchart LR
 - ✅ **Nothing is patched.** The original plug-in, its code signature and its copy protection or licensing are untouched.
 - ✅ **No third-party code is included.** You need your own installed (and licensed) copy.
 - ✅ **Easy to undo.** It's one extra `.component` file in your user plug-in folder.
+
+---
+
+## Is it safe?
+
+You build the shim yourself from this source code. There's no ready-made program to
+download and trust blindly, and the whole thing is small enough to read.
+
+**How small:** the shim is a single file, [`src/AUShim.mm`](src/AUShim.mm) (about 375
+lines, commented), plus a 45-line [`build.sh`](build.sh). That's everything.
+
+**What it does:**
+- Loads the plug-in you already have installed (read-only), and passes your DAW's calls to it.
+- Installs one file, `~/Library/Audio/Plug-Ins/Components/<Name>Shim.component`, in your
+  **user** folder.
+- `build.sh` restarts macOS's `AudioComponentRegistrar` so the new plug-in is picked up
+  immediately. macOS relaunches it automatically.
+
+**What it doesn't do:**
+- ❌ No network access: no downloads, no telemetry, no "phoning home"
+- ❌ No password or `sudo`, and no system folders touched
+- ❌ Never modifies the original plug-in, its signature or its licensing
+- ❌ Doesn't run other programs or write files at runtime
+
+**Check it yourself:**
+
+```sh
+grep -nEi "NSURL(Session|Connection)|socket|curl|http" src/AUShim.mm   # no output = no networking code
+grep -n sudo build.sh                                                    # no output = never asks for root
+nm -u build/Geist2Shim.component/Contents/MacOS/Geist2Shim               # every system function it uses
+```
+
+Every push is also built automatically on GitHub's macOS machines, which **fail the build
+if the compiled shim ever imports networking or process-launching functions**. See the
+*build* badge above and the [workflow](.github/workflows/build.yml).
+
+**The one unusual trick, in plain words:** the old plug-in remembers an internal "who am I"
+handle, which modern macOS no longer accepts for some notifications. The shim swaps that
+single value for the one your DAW uses, but only after checking it holds exactly the
+expected value; otherwise it leaves it alone and logs a warning. It's a few lines, marked
+in the source, and it never touches the plug-in's code or copy protection.
 
 ---
 
