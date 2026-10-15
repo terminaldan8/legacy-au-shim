@@ -63,15 +63,16 @@ git clone https://github.com/gsdan8/legacy-au-shim.git
 cd legacy-au-shim
 ```
 
-**2. See which of your plug-ins are affected**
+**2. See which of your plug-ins are affected.** This lists installed AUs that only
+register the old way:
 
 ```sh
-tools/find_legacy_aus.sh
-```
-```text
-Geist2.component                       [x86_64]       needs shim
-Spitter2.component                     [x86_64]       needs shim
-Mackity.component                      [i386 x86_64]  needs shim
+for d in /Library/Audio/Plug-Ins/Components/*.component; do
+  if ! /usr/libexec/PlistBuddy -c "Print :AudioComponents" "$d/Contents/Info.plist" >/dev/null 2>&1 \
+     && ls "$d/Contents/Resources" 2>/dev/null | grep -q "\.rsrc$"; then
+    basename "$d"
+  fi
+done
 ```
 
 **3. Install a shim.** If the plug-in has a ready-made config in [`configs/`](configs), run:
@@ -80,16 +81,10 @@ Mackity.component                      [i386 x86_64]  needs shim
 ./build.sh Geist2 install
 ```
 
-For any other plug-in, generate its config first:
+For any other plug-in, create a config first (see
+[Adding another plug-in](#adding-another-plug-in)), then run `./build.sh SomePlugin install`.
 
-```sh
-tools/make_config.py "/Library/Audio/Plug-Ins/Components/Some Plugin.component"
-#   wrote configs/SomePlugin.plist
-#   aufx Smpl Manu  "Vendor: Some Plugin"  entry=SymbiosisEntry  version=0x10000
-./build.sh SomePlugin install
-```
-
-**4. Check it.** The IDs are printed by `make_config.py`:
+**4. Check it.** Use the plug-in's type, subtype and manufacturer from its config:
 
 ```sh
 auval -v aumu FxG2 FXPN
@@ -123,11 +118,34 @@ Tested on macOS 27.0 (26A428) · Apple M1 Max · Ableton Live 12.4.6 (native, Ap
 | **ISM BazzISM2** 2.5.3 | AU wrapper | `BazzISM2` | ✅ | not yet tested |
 | Slate Digital FG-X 1.4 | Slate | generate | loads; untested without a license | — |
 
-**Got another plug-in working (or not)?** Please [open a plug-in report](../../issues/new?template=plugin-report.yml)
-and include your generated config, so it can be added to `configs/` for everyone.
+**Got another plug-in working (or not)?** Please open an issue, or a pull request with its
+config, so it can be added to `configs/` for everyone.
 
 Plug-ins built with the **Symbiosis** wrapper or **Apple's AUBase SDK** are the most
-likely to work. In general, anything `find_legacy_aus.sh` lists is worth a try.
+likely to work. In general, anything the step 2 command lists is worth a try.
+
+### Adding another plug-in
+
+1. Copy an existing config whose wrapper matches (Symbiosis → `Geist2.plist`,
+   Apple AU SDK → `Mackity.plist`):
+   ```sh
+   cp configs/Geist2.plist configs/SomePlugin.plist
+   ```
+2. Find the plug-in's ID and name in its resource file. The ID is the 4+4+4 characters
+   right after `aumu`, `aufx` or `aumf` (here: type `aufx`, subtype `Smpl`, manufacturer `Manu`):
+   ```sh
+   strings -a "/Library/Audio/Plug-Ins/Components/Some Plugin.component/Contents/Resources/"*.rsrc
+   #   aufxSmplManu
+   #   Vendor: Some Plugin
+   #   SymbiosisEntry
+   ```
+3. Edit `configs/SomePlugin.plist`:
+   - `AudioComponents` → `type`, `subtype`, `manufacturer`, `name` (the "Vendor: Plugin"
+     string), and `version` (`0xMMMMmmbb` as a decimal, e.g. 1.0.0 = `65536`)
+   - `LegacyAUBinary` → `/Library/Audio/Plug-Ins/Components/Some Plugin.component/Contents/MacOS/<executable>`
+   - `LegacyAUEntry` → the `…Entry` name from step 2 (also listed by `nm -gU <binary>`)
+   - `CFBundleExecutable`, `CFBundleName`, `CFBundleIdentifier` → something unique, e.g. `SomePluginShim`
+4. Build and check: `./build.sh SomePlugin install`, then `auval -v aufx Smpl Manu`.
 
 ---
 
@@ -136,11 +154,11 @@ likely to work. In general, anything `find_legacy_aus.sh` lists is worth a try.
 | Symptom | What to do |
 |---|---|
 | Plug-in still missing in the DAW | Quit the DAW completely and reopen it. In Live, Option-click **Rescan**. Check that `auval -v …` succeeds. |
-| `auval`: *didn't find the component* | The shim isn't installed or the ID is wrong. Run `ls ~/Library/Audio/Plug-Ins/Components` and compare the IDs in `configs/<Name>.plist` with `make_config.py`'s output. |
+| `auval`: *didn't find the component* | The shim isn't installed or the ID is wrong. Run `ls ~/Library/Audio/Plug-Ins/Components` and compare the IDs in `configs/<Name>.plist` with the plug-in's `.rsrc` (see [Adding another plug-in](#adding-another-plug-in)). |
 | `auval`: *Class Data fields … do not match* | Saving state needs the other instance mode. Add `<key>LegacyAUStateUsesLegacyInstance</key><true/>` (or `<false/>`) to the config, then rebuild. |
 | *Not Authorised* / license error | The plug-in's own licensing (iLok, etc.) isn't active on this Mac. Authorize it the normal way; the shim doesn't touch licensing. |
 | "Lost the connection to the Audio Unit" | The plug-in crashed in its host process. Open `~/Library/Logs/DiagnosticReports/AUHostingService*.ips` and open an issue with it. |
-| Editor won't open | Try `tools/editor_test` (build instructions are at the top of `tools/editor_test.m`) to reproduce outside the DAW, and include its output in an issue. |
+| Editor won't open | Open an issue with the host's crash report (if any) and the plug-in name. |
 
 Logs from the shim itself appear in Console.app; search for **`AUShim`**.
 
@@ -199,8 +217,7 @@ example) abort at load.
 
 ### Config reference
 
-`configs/<Name>.plist` becomes the shim bundle's `Info.plist`. `tools/make_config.py`
-fills it in for you.
+`configs/<Name>.plist` becomes the shim bundle's `Info.plist`.
 
 | Key | Meaning |
 |---|---|
@@ -217,9 +234,6 @@ fills it in for you.
 | [`src/AUShim.mm`](src/AUShim.mm) | The shim: AU v2 plug-in interface → Component Manager bridge |
 | [`configs/`](configs) | Ready-made configs |
 | [`build.sh`](build.sh) | `./build.sh <Name> [install\|uninstall]` |
-| [`tools/find_legacy_aus.sh`](tools/find_legacy_aus.sh) | Lists affected plug-ins on your Mac |
-| [`tools/make_config.py`](tools/make_config.py) | Generates a config from a legacy `.component` |
-| [`tools/editor_test.m`](tools/editor_test.m) | Minimal host that loads an AU and opens its editor, for debugging |
 
 ### Limitations
 

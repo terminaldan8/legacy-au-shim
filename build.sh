@@ -2,7 +2,6 @@
 # Builds an AU shim for a legacy plug-in described by configs/<Name>.plist.
 #
 #   ./build.sh [Name]              build build/<Name>Shim.component (default: Geist2)
-#   (create configs/<Name>.plist with tools/make_config.py <plug-in.component>)
 #   ./build.sh [Name] install      build and install to ~/Library/Audio/Plug-Ins/Components
 #   ./build.sh [Name] uninstall    remove the installed shim
 set -euo pipefail
