@@ -62,11 +62,11 @@ copy and paste three commands into an app called **Terminal**.
 
 ### Step 1: Open Terminal
 
-1. Press **⌘ Command + Space** to open Spotlight search.
-2. Type **Terminal** and press **Return**.
+1. Open **Finder** and go to **Applications → Utilities**.
+2. Double-click **Terminal**.
 
 A window with a blinking cursor appears. That's where you'll paste the commands. To paste:
-click inside the window, press **⌘ Command + V**, then press **Return**.
+right-click inside the window and choose **Paste**, then press **Return**.
 
 ### Step 2: Install Apple's free developer tools
 
@@ -117,7 +117,7 @@ That's it. The shim is installed. (This also saved the project in a folder calle
 
 ### Step 5: Restart your music app
 
-1. **Quit** your music app completely (**⌘ Command + Q**) and open it again.
+1. **Quit** your music app completely (in its menu bar, choose **Quit**) and open it again.
 2. **Ableton Live users:** if the plug-in still doesn't appear, open **Live → Settings →
    Plug-Ins**, hold the **Option** key and click **Rescan**.
 3. Open an old song that used the plug-in. Its settings should be back.
@@ -202,7 +202,7 @@ source, and it never touches the plug-in's code or copy protection.
 
 | What you see | What to do |
 |---|---|
-| The plug-in is still missing | Quit the music app completely (⌘Q) and reopen it. In Live, Option-click **Rescan** (Settings → Plug-Ins). |
+| The plug-in is still missing | Quit the music app completely (menu bar → **Quit**) and reopen it. In Live, Option-click **Rescan** (Settings → Plug-Ins). |
 | Step 4 says *"destination path 'legacy-au-shim' already exists"* | You've downloaded it before. Run `cd ~/legacy-au-shim && git pull && ./build.sh Geist2 install` instead. |
 | *"xcrun: error: invalid active developer path"* or *"git: command not found"* | Apple's developer tools aren't installed yet. Repeat [Step 2](#step-2-install-apples-free-developer-tools). |
 | *"no config"* | The install name is misspelled. Use `Geist2` or `Spitter2`. |
