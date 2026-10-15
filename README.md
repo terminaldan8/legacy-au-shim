@@ -74,7 +74,7 @@ lines, commented), plus a 45-line [`build.sh`](build.sh). That's everything.
 ```sh
 grep -nEi "NSURL(Session|Connection)|socket|curl|http" src/AUShim.mm   # no output = no networking code
 grep -n sudo build.sh                                                    # no output = never asks for root
-nm -u build/Geist2Shim.component/Contents/MacOS/Geist2Shim               # every system function it uses
+./build.sh Geist2 && nm -u build/Geist2Shim.component/Contents/MacOS/Geist2Shim   # every system function it uses
 ```
 
 Every push is also built automatically on GitHub's macOS machines, which **fail the build
