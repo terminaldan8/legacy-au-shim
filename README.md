@@ -143,7 +143,7 @@ Tested on macOS 27.0 (26A428) · Apple M1 Max · Ableton Live 12.4.6
 | Plug-in | Install name | Checked with Apple's validator | Tested in a music app |
 |---|---|:---:|---|
 | **FXpansion Geist2** 2.1.2 | `Geist2` | ✅ | ✅ Ableton Live: songs restore, editor opens |
-| **FXpansion Spitter2** 2.1.2 | `Spitter2` | ✅ | not yet tested |
+| **FXpansion Spitter2** 2.1.2 | `Spitter2` | ✅ | ✅ Ableton Live: loads and runs |
 
 Both are FXpansion plug-ins that were never updated after 2019. Plug-ins that are still
 maintained usually aren't affected; if you have an old copy of one, **updating it** from its
