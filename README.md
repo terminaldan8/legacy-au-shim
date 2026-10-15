@@ -2,7 +2,7 @@
 
 <p align="center">
   <b>Bring old Audio Unit plug-ins back to life on macOS 27.</b><br>
-  Geist2, Spitter2, Endless Smile, old Airwindows, BazzISM2 and more: the original plug-ins, unmodified.
+  FXpansion Geist2, Spitter2 and other classic plug-ins that were never updated: the originals, unmodified.
 </p>
 
 <p align="center">
@@ -133,8 +133,9 @@ Tested on macOS 27.0 (26A428) · Apple M1 Max · Ableton Live 12.4.6 (native, Ap
 Geist2, Spitter2 and Endless Smile use the **Symbiosis** wrapper, Mackity uses
 **Apple's AU SDK**, and BazzISM2 uses its own AU wrapper.
 
-**Got another plug-in working (or not)?** Please open an issue, or a pull request with its
-config, so it can be added to `configs/` for everyone.
+**Help grow this list.** The plug-ins this fixes are mostly abandoned ones that are hard to
+find. If you got another one working (or not), please open an issue or a pull request with
+its config, so it can be added to `configs/` for everyone.
 
 Plug-ins built with the **Symbiosis** wrapper or **Apple's AUBase SDK** are the most
 likely to work. In general, anything the step 2 command lists is worth a try.
