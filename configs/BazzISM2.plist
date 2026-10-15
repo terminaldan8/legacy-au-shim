@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>AudioComponents</key>
+	<array>
+		<dict>
+			<key>description</key>
+			<string>BazzISM2 (macOS 27 compatibility shim)</string>
+			<key>factoryFunction</key>
+			<string>AUShimFactory</string>
+			<key>manufacturer</key>
+			<string>ISM_</string>
+			<key>name</key>
+			<string>intelligent sounds &amp; music: BazzISM2</string>
+			<key>subtype</key>
+			<string>Baz2</string>
+			<key>type</key>
+			<string>aumu</string>
+			<key>version</key>
+			<integer>132355</integer>
+		</dict>
+	</array>
+	<key>CFBundleDevelopmentRegion</key>
+	<string>English</string>
+	<key>CFBundleExecutable</key>
+	<string>BazzISM2Shim</string>
+	<key>CFBundleIdentifier</key>
+	<string>io.github.gsdan8.aushim.BazzISM2</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundleName</key>
+	<string>BazzISM2Shim</string>
+	<key>CFBundlePackageType</key>
+	<string>BNDL</string>
+	<key>CFBundleShortVersionString</key>
+	<string>1.0</string>
+	<key>CFBundleVersion</key>
+	<string>1.0</string>
+	<key>LegacyAUBinary</key>
+	<string>/Library/Audio/Plug-Ins/Components/BazzISM2.component/Contents/MacOS/BazzISM2</string>
+	<key>LegacyAUEntry</key>
+	<string>AUWrapperEntry</string>
+</dict>
+</plist>

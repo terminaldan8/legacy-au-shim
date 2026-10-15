@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>AudioComponents</key>
+	<array>
+		<dict>
+			<key>description</key>
+			<string>Mackity AU (macOS 27 compatibility shim)</string>
+			<key>factoryFunction</key>
+			<string>AUShimFactory</string>
+			<key>manufacturer</key>
+			<string>Dthr</string>
+			<key>name</key>
+			<string>Airwindows: Mackity</string>
+			<key>subtype</key>
+			<string>mkty</string>
+			<key>type</key>
+			<string>aufx</string>
+			<key>version</key>
+			<integer>65536</integer>
+		</dict>
+	</array>
+	<key>CFBundleDevelopmentRegion</key>
+	<string>English</string>
+	<key>CFBundleExecutable</key>
+	<string>MackityShim</string>
+	<key>CFBundleIdentifier</key>
+	<string>io.github.gsdan8.aushim.Mackity</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundleName</key>
+	<string>MackityShim</string>
+	<key>CFBundlePackageType</key>
+	<string>BNDL</string>
+	<key>CFBundleShortVersionString</key>
+	<string>1.0</string>
+	<key>CFBundleVersion</key>
+	<string>1.0</string>
+	<key>LegacyAUBinary</key>
+	<string>/Library/Audio/Plug-Ins/Components/Mackity.component/Contents/MacOS/Mackity</string>
+	<key>LegacyAUEntry</key>
+	<string>MackityEntry</string>
+</dict>
+</plist>
