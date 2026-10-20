@@ -53,6 +53,10 @@ After installing it:
 **Not sure?** Ableton Live users can check: when you open an old song, Live shows the
 plug-in as missing, and its log file (`Log.txt`) contains *"Restore 1 failed: Geist2"*.
 
+> **Missing an Intel-only VST instead?** Native music apps can't load Intel VST or VST 3
+> plug-ins at all. That's a different problem, solved by the sibling project
+> [VST AU Bridge](https://github.com/terminaldan8/vst-au-bridge), which turns them into Audio Units.
+
 ---
 
 ## Install it: step by step
