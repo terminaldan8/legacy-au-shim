@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleDevelopmentRegion</key>
+	<string>English</string>
+	<key>CFBundleExecutable</key>
+	<string>Geist2Shim</string>
+	<key>CFBundleIdentifier</key>
+	<string>io.github.gsdan8.aushim.Geist2</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundleName</key>
+	<string>Geist2Shim</string>
+	<key>CFBundlePackageType</key>
+	<string>BNDL</string>
+	<key>CFBundleShortVersionString</key>
+	<string>1.0</string>
+	<key>CFBundleVersion</key>
+	<string>1.0</string>
+
+	<!-- The genuine legacy plug-in binary to load (left untouched). -->
+	<key>LegacyAUBinary</key>
+	<string>/Library/Audio/Plug-Ins/Components/Geist2.component/Contents/MacOS/Geist2</string>
+	<!-- Its Component Manager entry point (the 'dlle' name in its .rsrc). -->
+	<key>LegacyAUEntry</key>
+	<string>SymbiosisEntry</string>
+
+	<!-- Must match the legacy plug-in's 'thng' resource exactly, so saved
+	     projects resolve to this shim. version = 0xMMMMmmbb (2.1.2). -->
+	<key>AudioComponents</key>
+	<array>
+		<dict>
+			<key>type</key>
+			<string>aumu</string>
+			<key>subtype</key>
+			<string>FxG2</string>
+			<key>manufacturer</key>
+			<string>FXPN</string>
+			<key>name</key>
+			<string>FXpansion: Geist2</string>
+			<key>description</key>
+			<string>FXpansion Geist2 (macOS 27 compatibility shim)</string>
+			<key>version</key>
+			<integer>131330</integer>
+			<key>factoryFunction</key>
+			<string>AUShimFactory</string>
+		</dict>
+	</array>
+</dict>
+</plist>
